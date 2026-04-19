@@ -73,7 +73,19 @@ export default function HomePage() {
         throw new Error(base + extra);
       }
 
-      sessionStorage.setItem('careerPathResults', JSON.stringify(data.data));
+      try {
+        sessionStorage.setItem('careerPathResults', JSON.stringify(data.data));
+      } catch (storageErr) {
+        if (
+          storageErr instanceof DOMException &&
+          (storageErr.name === 'QuotaExceededError' || storageErr.code === 22)
+        ) {
+          throw new Error(
+            'Your browser could not save the trace (storage full). Close other tabs or clear site data for localhost, then try again.'
+          );
+        }
+        throw storageErr;
+      }
       router.push('/results', { scroll: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to analyze career path. Please try again.');

@@ -12,7 +12,6 @@ import {
   MapPin,
   MessageCircle,
   Briefcase,
-  Globe,
   ArrowRight,
 } from 'lucide-react';
 import { JourneyDetailDialog } from './JourneyDetailDialog';
@@ -27,16 +26,18 @@ interface JourneyCardCompactProps {
 
 function anchorIcon(kind: RelevanceAnchor['kind']) {
   switch (kind) {
-    case 'school':
-      return <GraduationCap className="h-3 w-3" aria-hidden />;
-    case 'employer':
+    case 'same_employer':
+    case 'employer_tier':
+    case 'starting_tier':
       return <Building2 className="h-3 w-3" aria-hidden />;
-    case 'company_tier':
-      return <Briefcase className="h-3 w-3" aria-hidden />;
+    case 'same_school':
+    case 'school_tier_level':
+    case 'field_at_level':
+      return <GraduationCap className="h-3 w-3" aria-hidden />;
     case 'role_family':
       return <Briefcase className="h-3 w-3" aria-hidden />;
-    case 'region':
-      return <Globe className="h-3 w-3" aria-hidden />;
+    case 'same_region':
+      return <MapPin className="h-3 w-3" aria-hidden />;
     default:
       return null;
   }

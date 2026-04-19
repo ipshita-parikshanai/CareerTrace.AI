@@ -82,7 +82,19 @@ export function TraceYourFriendBox({
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Something went wrong');
-      sessionStorage.setItem('careerPathResults', JSON.stringify(data.data));
+      try {
+        sessionStorage.setItem('careerPathResults', JSON.stringify(data.data));
+      } catch (storageErr) {
+        if (
+          storageErr instanceof DOMException &&
+          (storageErr.name === 'QuotaExceededError' || storageErr.code === 22)
+        ) {
+          throw new Error(
+            'Your browser could not save the trace (storage full). Try again after closing other tabs or clearing site data.'
+          );
+        }
+        throw storageErr;
+      }
       // Stash the comparison context so /results can render a "vs. {owner}" banner.
       if (traceId) {
         const ctx: CompareContext = {

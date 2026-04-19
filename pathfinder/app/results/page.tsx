@@ -18,6 +18,8 @@ import { CareerJourney, CareerInsights, CareerPathSearchStats, LinkedInProfile }
 
 export default function ResultsPage() {
   const router = useRouter();
+  const [pageState, setPageState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<LinkedInProfile | null>(null);
   const [careerJourneys, setCareerJourneys] = useState<CareerJourney[]>([]);
   const [insights, setInsights] = useState<CareerInsights | null>(null);
@@ -38,46 +40,96 @@ export default function ResultsPage() {
     const resultsData = sessionStorage.getItem('careerPathResults');
 
     if (!resultsData) {
-      router.push('/');
+      router.replace('/');
       return;
     }
 
     try {
-      const data = JSON.parse(resultsData);
-      const up = data.userProfile
-        ? normalizeLinkedInProfile(data.userProfile as LinkedInProfile)
-        : null;
+      const data = JSON.parse(resultsData) as Record<string, unknown>;
+
+      if (!data.userProfile || typeof data.userProfile !== 'object') {
+        setLoadError(
+          'We could not read your profile from this session. Run a new trace from the home page.'
+        );
+        setPageState('error');
+        return;
+      }
+
+      const up = normalizeLinkedInProfile(data.userProfile as LinkedInProfile);
       setUserProfile(up);
-      const journeys: CareerJourney[] = (data.careerJourneys || []).map((j: CareerJourney) => ({
-        ...j,
-        profile: normalizeLinkedInProfile(j.profile),
-      }));
+
+      const raw = Array.isArray(data.careerJourneys) ? data.careerJourneys : [];
+      const journeys: CareerJourney[] = [];
+      for (const j of raw as CareerJourney[]) {
+        try {
+          if (!j?.profile) continue;
+          journeys.push({
+            ...j,
+            profile: normalizeLinkedInProfile(j.profile),
+          });
+        } catch {
+          /* skip malformed journey row */
+        }
+      }
       setCareerJourneys(journeys);
-      setInsights(data.insights ?? null);
-      setGoalTitle(data.goalTitle || '');
-      setGoalCompany(data.goalCompany ?? null);
-      setGoalIndustry(data.goalIndustry ?? null);
-      setUserLinkedInUrl(data.userLinkedInUrl);
+      setInsights((data.insights as CareerInsights | null | undefined) ?? null);
+      setGoalTitle(typeof data.goalTitle === 'string' ? data.goalTitle : '');
+      setGoalCompany((data.goalCompany as string | null | undefined) ?? null);
+      setGoalIndustry((data.goalIndustry as string | null | undefined) ?? null);
+      setUserLinkedInUrl(data.userLinkedInUrl as string | undefined);
       setAlreadyAtGoalMessage(
-        data.alreadyAtGoal === true ? data.message ?? null : null
+        data.alreadyAtGoal === true
+          ? typeof data.message === 'string'
+            ? data.message
+            : null
+          : null
       );
-      setSearchStats(data.searchStats ?? null);
+      setSearchStats((data.searchStats as CareerPathSearchStats | null | undefined) ?? null);
+      setPageState('ready');
     } catch (error) {
       console.error('Error loading results:', error);
-      router.push('/');
+      setLoadError(
+        'Your results could not be loaded. If this keeps happening, restart the dev server or run a new trace from the home page.'
+      );
+      setPageState('error');
     }
   }, [router]);
 
   useLayoutEffect(() => {
-    scrollToTop();
-  }, [userProfile]);
+    if (pageState === 'ready' && userProfile) {
+      scrollToTop();
+    }
+  }, [pageState, userProfile]);
 
-  if (!userProfile) {
+  if (pageState === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-50 via-teal-50/30 to-sky-50/40 dark:from-slate-950 dark:via-teal-950/30 dark:to-sky-950/40">
         <div className="flex flex-col items-center gap-3">
           <div className="h-12 w-12 animate-spin rounded-full border-2 border-teal-200 border-t-teal-600 dark:border-teal-800 dark:border-t-teal-400" />
           <p className="text-sm font-medium text-slate-600 dark:text-slate-400">Loading your trace…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (pageState === 'error' || !userProfile) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-gradient-to-b from-slate-50 via-teal-50/30 to-sky-50/40 px-4 dark:from-slate-950 dark:via-teal-950/30 dark:to-sky-950/40">
+        <div className="max-w-md rounded-2xl border border-amber-200 bg-white/95 p-8 text-center shadow-lg dark:border-amber-900/50 dark:bg-slate-900/90">
+          <p className="font-heading mb-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+            Could not show results
+          </p>
+          <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            {loadError ||
+              'Something went wrong loading this page. Try running a new trace from the home page.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => router.replace('/', { scroll: true })}
+            className="font-heading mt-6 inline-flex h-10 items-center justify-center rounded-xl bg-teal-600 px-6 text-sm font-semibold text-white hover:bg-teal-700"
+          >
+            Back to home
+          </button>
         </div>
       </div>
     );
