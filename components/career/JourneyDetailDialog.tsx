@@ -23,11 +23,18 @@ import {
   MapPin,
   RefreshCw,
   Sparkles,
+  Star,
   TrendingUp,
 } from 'lucide-react';
 import type { CareerJourney, Education, Employer, LinkedInProfile } from '@/lib/types';
 import { companyNameFromLinkedInCompanyUrl } from '@/lib/api/normalize-profile';
 import { parseCareerDate, estimateYearsFromEmployers } from '@/lib/career/tenure';
+import {
+  overlapForEducation,
+  overlapForEmployer,
+  countOverlaps,
+  type JourneyOverlap,
+} from '@/lib/career/journey-overlap';
 
 interface JourneyDetailDialogProps {
   open: boolean;
@@ -114,6 +121,48 @@ interface OutreachDraft {
   rationale: string;
 }
 
+function TimelineRow({
+  showLine,
+  dot,
+  overlap,
+  children,
+}: {
+  showLine: boolean;
+  dot: React.ReactNode;
+  overlap: JourneyOverlap | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex gap-4">
+      <div className="flex flex-col items-center pt-1">
+        {dot}
+        {showLine ? (
+          <div className="mt-1 min-h-[1.75rem] w-0.5 flex-1 bg-slate-300 dark:bg-slate-700" />
+        ) : null}
+      </div>
+      <div
+        className={`flex-1 pb-3 ${
+          overlap
+            ? 'rounded-lg border border-amber-300 bg-amber-50/70 px-3 py-2 shadow-sm dark:border-amber-700/60 dark:bg-amber-900/20'
+            : ''
+        }`}
+      >
+        {overlap ? (
+          <Badge
+            variant="secondary"
+            className="font-heading mb-1.5 gap-1 border-amber-300 bg-amber-100 text-[10px] font-semibold text-amber-900 dark:border-amber-700 dark:bg-amber-900/40 dark:text-amber-100"
+            title={`You: ${overlap.matchedUserValue}`}
+          >
+            <Star className="h-3 w-3 fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400" />
+            {overlap.label}
+          </Badge>
+        ) : null}
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function JourneyDetailDialog({
   open,
   onOpenChange,
@@ -134,6 +183,7 @@ export function JourneyDetailDialog({
   const yearsExp =
     estimateYearsFromEmployers(candidate.all_employers) ||
     Math.round(candidate.years_of_experience_raw ?? journey.path_highlights?.total_years ?? 0);
+  const overlapTotal = countOverlaps(candidate, userProfile);
 
   const generate = async () => {
     if (!userProfile) return;
@@ -257,12 +307,25 @@ export function JourneyDetailDialog({
 
         {/* Full journey */}
         <div>
-          <h4 className="font-heading mb-1 text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Full journey
-          </h4>
-          <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-            Schools, degrees, and every role from their profile — newest first.
-          </p>
+          <div className="mb-3 flex items-end justify-between gap-3">
+            <div>
+              <h4 className="font-heading text-sm font-semibold text-slate-900 dark:text-slate-100">
+                Full journey
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Schools, degrees, and every role — newest first. {userProfile ? 'Items shaded amber overlap with your profile.' : ''}
+              </p>
+            </div>
+            {overlapTotal > 0 ? (
+              <Badge
+                variant="secondary"
+                className="font-heading shrink-0 gap-1 border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200"
+              >
+                <Star className="h-3 w-3 fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400" />
+                {overlapTotal} overlap{overlapTotal === 1 ? '' : 's'} with you
+              </Badge>
+            ) : null}
+          </div>
           {timeline.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">No history available.</p>
           ) : (
@@ -272,63 +335,89 @@ export function JourneyDetailDialog({
                 if (entry.kind === 'education') {
                   const edu = entry.data;
                   const when = educationDateRange(edu);
+                  const overlap = overlapForEducation(edu, userProfile);
                   return (
-                    <div key={`edu-${i}`} className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className={`h-3 w-3 rounded-full ${i === 0 ? 'bg-violet-500' : 'bg-violet-300 dark:bg-violet-600'}`} />
-                        {showLine ? <div className="mt-1 min-h-[1.75rem] w-0.5 flex-1 bg-slate-300 dark:bg-slate-700" /> : null}
-                      </div>
-                      <div className="flex-1 pb-3">
-                        <Badge
-                          variant="secondary"
-                          className="mb-1 border-violet-200 bg-violet-50 text-[10px] font-medium text-violet-900 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-200"
-                        >
-                          Education
-                        </Badge>
-                        <h5 className="font-medium text-slate-900 dark:text-slate-100">{educationHeadline(edu)}</h5>
-                        <p className="mt-0.5 flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
-                          <GraduationCap className="h-3.5 w-3.5 shrink-0 text-violet-500 dark:text-violet-400" aria-hidden />
-                          <span>{edu.institute_name?.trim() || '—'}</span>
-                        </p>
-                        {when ? <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{when}</p> : null}
-                      </div>
-                    </div>
+                    <TimelineRow
+                      key={`edu-${i}`}
+                      showLine={showLine}
+                      dot={
+                        <div
+                          className={`h-3 w-3 rounded-full ring-2 ring-white dark:ring-slate-950 ${
+                            overlap
+                              ? 'bg-amber-500 ring-amber-200 dark:ring-amber-700'
+                              : i === 0
+                                ? 'bg-violet-500'
+                                : 'bg-violet-300 dark:bg-violet-600'
+                          }`}
+                        />
+                      }
+                      overlap={overlap}
+                    >
+                      <Badge
+                        variant="secondary"
+                        className="mb-1 border-violet-200 bg-violet-50 text-[10px] font-medium text-violet-900 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-200"
+                      >
+                        Education
+                      </Badge>
+                      <h5 className="font-medium text-slate-900 dark:text-slate-100">
+                        {educationHeadline(edu)}
+                      </h5>
+                      <p className="mt-0.5 flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
+                        <GraduationCap className="h-3.5 w-3.5 shrink-0 text-violet-500 dark:text-violet-400" aria-hidden />
+                        <span>{edu.institute_name?.trim() || '—'}</span>
+                      </p>
+                      {when ? (
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{when}</p>
+                      ) : null}
+                    </TimelineRow>
                   );
                 }
                 const job = entry.data;
                 const when = dateRangeLine(job);
+                const overlap = overlapForEmployer(job, userProfile);
                 return (
-                  <div key={`job-${i}`} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div className={`h-3 w-3 rounded-full ${i === 0 ? 'bg-teal-500' : 'bg-sky-500 dark:bg-sky-400'}`} />
-                      {showLine ? <div className="mt-1 min-h-[1.75rem] w-0.5 flex-1 bg-slate-300 dark:bg-slate-700" /> : null}
-                    </div>
-                    <div className="flex-1 pb-3">
-                      <Badge
-                        variant="secondary"
-                        className="mb-1 border-slate-200 bg-slate-50 text-[10px] font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                      >
-                        Work
-                      </Badge>
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <h5 className="font-medium text-slate-900 dark:text-slate-100">{jobTitle(job)}</h5>
-                          <p className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
-                            <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" aria-hidden />
-                            <span>{companyLine(job)}</span>
-                          </p>
-                        </div>
-                        {(job.duration_months != null || job.years_at_company_raw != null) && (
-                          <Badge variant="outline" className="shrink-0 text-xs dark:border-slate-700 dark:text-slate-200">
-                            {job.duration_months != null
-                              ? `${Math.max(1, Math.round(job.duration_months / 12))}y`
-                              : `${Math.round((job.years_at_company_raw ?? 0) * 10) / 10}y`}
-                          </Badge>
-                        )}
+                  <TimelineRow
+                    key={`job-${i}`}
+                    showLine={showLine}
+                    dot={
+                      <div
+                        className={`h-3 w-3 rounded-full ring-2 ring-white dark:ring-slate-950 ${
+                          overlap
+                            ? 'bg-amber-500 ring-amber-200 dark:ring-amber-700'
+                            : i === 0
+                              ? 'bg-teal-500'
+                              : 'bg-sky-500 dark:bg-sky-400'
+                        }`}
+                      />
+                    }
+                    overlap={overlap}
+                  >
+                    <Badge
+                      variant="secondary"
+                      className="mb-1 border-slate-200 bg-slate-50 text-[10px] font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    >
+                      Work
+                    </Badge>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h5 className="font-medium text-slate-900 dark:text-slate-100">{jobTitle(job)}</h5>
+                        <p className="flex items-center gap-1.5 text-sm text-slate-700 dark:text-slate-300">
+                          <Building2 className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-slate-500" aria-hidden />
+                          <span>{companyLine(job)}</span>
+                        </p>
                       </div>
-                      {when ? <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{when}</p> : null}
+                      {(job.duration_months != null || job.years_at_company_raw != null) && (
+                        <Badge variant="outline" className="shrink-0 text-xs dark:border-slate-700 dark:text-slate-200">
+                          {job.duration_months != null
+                            ? `${Math.max(1, Math.round(job.duration_months / 12))}y`
+                            : `${Math.round((job.years_at_company_raw ?? 0) * 10) / 10}y`}
+                        </Badge>
+                      )}
                     </div>
-                  </div>
+                    {when ? (
+                      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{when}</p>
+                    ) : null}
+                  </TimelineRow>
                 );
               })}
             </div>

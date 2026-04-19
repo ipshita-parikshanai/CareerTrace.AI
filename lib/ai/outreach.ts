@@ -1,11 +1,19 @@
 import OpenAI from 'openai';
 import type { LinkedInProfile } from '@/lib/types';
 
+/** Pick a valid HTTP-Referer for OpenRouter. Prefers NEXT_PUBLIC_APP_URL, then
+ *  Vercel's auto-injected VERCEL_URL, then localhost for dev. */
+function appReferer(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+}
+
 const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1',
   defaultHeaders: {
-    'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    'HTTP-Referer': appReferer(),
     'X-Title': 'CareerTrace.AI - Outreach Drafts',
   },
 });

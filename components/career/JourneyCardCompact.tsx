@@ -13,10 +13,12 @@ import {
   MessageCircle,
   Briefcase,
   ArrowRight,
+  Star,
 } from 'lucide-react';
 import { JourneyDetailDialog } from './JourneyDetailDialog';
 import type { CareerJourney, LinkedInProfile, RelevanceAnchor } from '@/lib/types';
 import { estimateYearsFromEmployers } from '@/lib/career/tenure';
+import { countOverlaps } from '@/lib/career/journey-overlap';
 
 interface JourneyCardCompactProps {
   journey: CareerJourney;
@@ -65,6 +67,7 @@ export function JourneyCardCompact({ journey, userProfile, goalTitle }: JourneyC
   const yearsExp =
     estimateYearsFromEmployers(profile.all_employers) ||
     Math.round(profile.years_of_experience_raw ?? journey.path_highlights?.total_years ?? 0);
+  const overlapCount = countOverlaps(profile, userProfile);
 
   return (
     <>
@@ -157,6 +160,18 @@ export function JourneyCardCompact({ journey, userProfile, goalTitle }: JourneyC
                 </Badge>
               ) : null}
             </div>
+          ) : null}
+
+          {/* Overlap with the current user (highlighted in detail dialog) */}
+          {overlapCount > 0 ? (
+            <Badge
+              variant="secondary"
+              className="font-heading w-fit gap-1 border-amber-300 bg-amber-50 text-[11px] text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200"
+              title="Open the journey to see what overlaps with your profile"
+            >
+              <Star className="h-3 w-3 fill-amber-500 text-amber-500 dark:fill-amber-400 dark:text-amber-400" />
+              {overlapCount} overlap{overlapCount === 1 ? '' : 's'} with you
+            </Badge>
           ) : null}
 
           {/* Mentorship signal (if any) */}

@@ -19,11 +19,21 @@ function normalizeCareerInsights(raw: Partial<CareerInsights>): CareerInsights {
   };
 }
 
+/** OpenRouter requires a non-empty HTTP-Referer. Resolution order:
+ *  1. NEXT_PUBLIC_APP_URL  (you set this explicitly in Vercel)
+ *  2. VERCEL_URL           (Vercel injects this for every deployment)
+ *  3. localhost            (local dev only) */
+function appReferer(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+}
+
 const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   baseURL: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1',
   defaultHeaders: {
-    'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    'HTTP-Referer': appReferer(),
     'X-Title': 'CareerTrace.AI - Career Discovery Platform',
   },
 });
