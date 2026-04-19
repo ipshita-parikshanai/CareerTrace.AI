@@ -1,0 +1,205 @@
+{
+  "_meta": {
+    "purpose": "Curated, hand-picked list of inspiring women role models surfaced alongside cascade-search results. Inference-free — every profile is intentionally chosen, not algorithmically guessed. Edit freely.",
+    "lastUpdatedAt": "2026-04-19"
+  },
+  "categories": {
+    "engineering": {
+      "match_keywords": [
+        "software engineer",
+        "swe",
+        "sde",
+        "developer",
+        "engineering",
+        "engineer",
+        "full stack",
+        "backend",
+        "frontend",
+        "infrastructure",
+        "platform",
+        "devops",
+        "ml engineer",
+        "machine learning"
+      ],
+      "mentors": [
+        {
+          "name": "Reshma Saujani",
+          "currentRole": "Founder, Girls Who Code",
+          "company": "Girls Who Code",
+          "profileUrl": "https://www.linkedin.com/in/reshmasaujani/",
+          "inspiration": "Built one of the largest pipelines for women in tech globally."
+        },
+        {
+          "name": "Diane Greene",
+          "currentRole": "Co-founder, VMware · ex-CEO Google Cloud",
+          "company": "VMware / Google Cloud",
+          "profileUrl": "https://www.linkedin.com/in/diane-greene-7b97b28/",
+          "inspiration": "Founded VMware, then led Google Cloud. Engineer-turned-CEO blueprint."
+        },
+        {
+          "name": "Padmasree Warrior",
+          "currentRole": "Founder & CEO, Fable",
+          "company": "Fable",
+          "profileUrl": "https://www.linkedin.com/in/padmasreewarrior/",
+          "inspiration": "From CTO of Cisco and Motorola to founding her own startup."
+        }
+      ]
+    },
+    "product": {
+      "match_keywords": [
+        "product manager",
+        "product",
+        "pm",
+        "product owner",
+        "product lead",
+        "head of product",
+        "vp product",
+        "chief product"
+      ],
+      "mentors": [
+        {
+          "name": "Aparna Chennapragada",
+          "currentRole": "CVP, AI at Work · Microsoft",
+          "company": "Microsoft",
+          "profileUrl": "https://www.linkedin.com/in/aparnacd/",
+          "inspiration": "Built AR/AI products at Google before becoming Robinhood's CPO and now leading AI at Microsoft."
+        },
+        {
+          "name": "Deepa Subramaniam",
+          "currentRole": "Product leader · ex-VP Product, Adobe",
+          "company": "Independent",
+          "profileUrl": "https://www.linkedin.com/in/deepa108/",
+          "inspiration": "Engineering background → top product roles at Adobe, change.org, Code for America."
+        },
+        {
+          "name": "Shreyas Doshi",
+          "currentRole": "Product coach · ex-Stripe / Twitter / Google",
+          "company": "Independent",
+          "profileUrl": "https://www.linkedin.com/in/shreyasdoshi/",
+          "inspiration": "Influential PM thinker — note: identifies as male; included only as a learning resource if no women mentor matches."
+        }
+      ]
+    },
+    "data": {
+      "match_keywords": [
+        "data scientist",
+        "data science",
+        "analytics",
+        "data analyst",
+        "ml scientist",
+        "research scientist",
+        "applied scientist",
+        "ai researcher"
+      ],
+      "mentors": [
+        {
+          "name": "Fei-Fei Li",
+          "currentRole": "Co-Director, Stanford HAI · Founder, World Labs",
+          "company": "Stanford / World Labs",
+          "profileUrl": "https://www.linkedin.com/in/fei-fei-li-4541247/",
+          "inspiration": "Created ImageNet — catalysed the modern deep learning era."
+        },
+        {
+          "name": "Cassie Kozyrkov",
+          "currentRole": "CEO, Kozyr · ex-Chief Decision Scientist, Google",
+          "company": "Kozyr",
+          "profileUrl": "https://www.linkedin.com/in/kozyrkov/",
+          "inspiration": "Made statistics + ML accessible to thousands of practitioners through her writing."
+        },
+        {
+          "name": "Hilary Mason",
+          "currentRole": "Founder & CEO, Hidden Door · ex-Chief Scientist, Bitly",
+          "company": "Hidden Door",
+          "profileUrl": "https://www.linkedin.com/in/hilarymason/",
+          "inspiration": "Pioneer of applied data science; now building AI-native storytelling products."
+        }
+      ]
+    },
+    "leadership": {
+      "match_keywords": [
+        "engineering manager",
+        "em",
+        "director",
+        "vp",
+        "vice president",
+        "head of",
+        "chief",
+        "ceo",
+        "cto",
+        "coo",
+        "founder",
+        "co-founder"
+      ],
+      "mentors": [
+        {
+          "name": "Sheryl Sandberg",
+          "currentRole": "Author, Lean In · ex-COO, Meta",
+          "company": "Lean In Foundation",
+          "profileUrl": "https://www.linkedin.com/in/sheryl-sandberg-5126652/",
+          "inspiration": "Defined modern operator-leadership at Google, then Facebook/Meta."
+        },
+        {
+          "name": "Falguni Nayar",
+          "currentRole": "Founder & CEO, Nykaa",
+          "company": "Nykaa",
+          "profileUrl": "https://www.linkedin.com/in/falguni-nayar-7b1ab1/",
+          "inspiration": "Left investment banking at 50 to build India's most successful beauty unicorn."
+        },
+        {
+          "name": "Ruchi Sanghvi",
+          "currentRole": "Co-founder, South Park Commons · ex-VP Operations, Dropbox",
+          "company": "South Park Commons",
+          "profileUrl": "https://www.linkedin.com/in/ruchisanghvi/",
+          "inspiration": "First woman engineer at Facebook → founder → talent ecosystem builder."
+        }
+      ]
+    },
+    "design": {
+      "match_keywords": [
+        "designer",
+        "design",
+        "ux",
+        "ui",
+        "product designer",
+        "head of design",
+        "vp design",
+        "creative director"
+      ],
+      "mentors": [
+        {
+          "name": "Julie Zhuo",
+          "currentRole": "Co-founder, Sundial · ex-VP Design, Facebook",
+          "company": "Sundial",
+          "profileUrl": "https://www.linkedin.com/in/julie-zhuo/",
+          "inspiration": "Wrote 'The Making of a Manager'; scaled design from intern to VP at Meta."
+        },
+        {
+          "name": "Katie Dill",
+          "currentRole": "Head of Design, Stripe · ex-VP Design, Lyft & Airbnb",
+          "company": "Stripe",
+          "profileUrl": "https://www.linkedin.com/in/katherine-dill-3a23761/",
+          "inspiration": "Built design teams at three iconic consumer companies."
+        }
+      ]
+    },
+    "general": {
+      "match_keywords": [],
+      "mentors": [
+        {
+          "name": "Kiran Mazumdar-Shaw",
+          "currentRole": "Founder & Executive Chairperson, Biocon",
+          "company": "Biocon",
+          "profileUrl": "https://www.linkedin.com/in/kiranmazumdarshaw/",
+          "inspiration": "Built India's largest biopharma company starting from her garage in 1978."
+        },
+        {
+          "name": "Indra Nooyi",
+          "currentRole": "Author · ex-Chair & CEO, PepsiCo",
+          "company": "Independent",
+          "profileUrl": "https://www.linkedin.com/in/indra-nooyi/",
+          "inspiration": "First woman of colour to lead a Fortune 50 company."
+        }
+      ]
+    }
+  }
+}

@@ -2,100 +2,104 @@
 
 **Trace real paths to your next role — from people who once stood where you stand.**
 
-CareerTrace turns LinkedIn into a lens: you pick your profile and a goal title, and we surface **real journeys** of professionals who share concrete background with you (school, employer, region) and have **reached that goal** — plus concise AI insights and optional outreach drafts.
+CareerTrace turns LinkedIn into a lens: you pick your profile and a goal title, and we surface **real journeys** of professionals who share concrete background with you (same company, school, city) and have **reached that goal** — plus concise AI insights and optional outreach drafts.
 
 ---
 
 ## Why we built this
 
-Career decisions are high-stakes, but most advice is generic. LinkedIn shows *who* people are today, not the **path** they took to get there. We wanted something grounded in **real outcomes**: not motivational quotes, but timelines, overlaps, and “people like me who made the jump.”
-
-That gap became the core problem statement for our hackathon build.
+Career decisions are high-stakes, but most advice is generic. LinkedIn shows *who* people are today, not the **path** they took to get there. We wanted something grounded in **real outcomes**: timelines, overlaps, and “people like me who made the jump.”
 
 ---
 
-## How we landed on the idea
+## How it works today (technical)
 
-1. **Start from data, not slides**  
-   We asked: *What if every “similar story” was backed by an actual profile and a structured career history?* CrustData’s enrichment and PersonDB search made that technically possible.
+- **CrustData v2 Person API** (`/person/enrich`, `/person/search`) with `Bearer` auth and `x-api-version: 2025-11-01`.
+- **Cascade search**: we ask CrustData in order — same employer + role → same employer → same college (+ degree) → same college → same city + role → broad goal title — and stop once we have enough candidates. Each result shows **which tier** it came from and **how many people** matched that tier (`total_count`).
+- **Ranking** stays heuristic and anchor-driven; one main LLM call summarizes patterns across journeys.
+- **Women role models**: a small **curated** sidebar (hand-picked names in `data/women-mentors.json`) — not inferred from gender.
 
-2. **“People like me” has to mean something**  
-   We rejected vague “similarity scores” as the headline. Instead we prioritized **explainable overlaps** — same school, same employer, same region, same role family — so users can see *why* a match is shown.
-
-3. **Keep AI thin and honest**  
-   Ranking stays **heuristic and anchor-driven**; the main LLM call produces **readable insights** (and optional intro drafts on demand). Judges and users can trace claims back to CrustData fields.
-
-4. **Ship a full loop**  
-   Input → enrich user → search people who reached the goal → enrich candidates → rank → insights → shareable read-only trace. One coherent product, not a slideware demo.
+Detailed architecture: see `**crusdata_api_doc/ARCHITECTURE.md`** in the monorepo (if present).
 
 ---
 
-## What you get
+## Who can use it / limits
 
-| Capability | Description |
-|------------|-------------|
-| **Similar paths** | Journeys from LinkedIn, normalized and ranked with shared-background priority. |
-| **Insights** | Patterns across the returned journeys (timeline, common moves). |
-| **Outreach** | Optional AI draft intro per journey card (lazy-loaded). |
-| **Trace your friend** | Share a read-only snapshot; compare side-by-side when a friend runs their own trace. |
+- **Your profile must exist in CrustData.** We call **enrich** on your LinkedIn URL first. If CrustData has never indexed that person, enrich returns **no match** — the app responds with **404** and a clear message (not a payment error).
+- **Search** finds *other* people in CrustData’s database who match your goal and shared background. Coverage depends on CrustData’s index (typically stronger for larger employers and well-known schools).
+- If someone isn’t indexed: use **another public profile** CrustData already has for the demo, or ask **CrustData** about indexing or realtime enrichment options for your account.
 
 ---
 
-## Tech stack (summary)
-
-- **App:** Next.js (App Router), React, TypeScript, Tailwind CSS  
-- **Data:** [CrustData](https://crustdata.com) — profile enrich + PersonDB search  
-- **Cache:** Supabase (LinkedIn profile cache, shared traces)  
-- **AI:** OpenRouter-compatible API for insights and outreach  
-
-Hackathon reference docs from the organizing committee live in **`crustdata_new_api_doc/`** (person, company, and web API markdown).
-
----
-
-## Repository layout
-
-This hackathon codebase lives alongside documentation:
+## Repo layout (monorepo)
 
 ```
-careertrace/              ← you are here (product README)
-pathfinder/               ← Next.js application (main code)
-crustdata_new_api_doc/    ← CrustData API reference (committee-provided)
+PeopleLikeMe/
+  careertrace/          ← this README (product + migration notes)
+  pathfinder/           ← Next.js app (clone this folder into your new repo root if you prefer)
+  crusdata_api_doc/     ← optional API / architecture docs
 ```
-
-**Run the app:**
-
-```bash
-cd pathfinder
-npm install
-cp .env.example .env.local   # add CRUSTDATA_API_KEY, Supabase, OpenRouter, etc.
-npm run dev
-```
-
-Open `http://localhost:3000`.
 
 ---
 
-## Environment variables
+## Moving to a **new** Git repository
 
-Configure in `pathfinder/.env.local` (see `pathfinder/.env.example`):
+1. **Create** the new repo on GitHub (empty, no README if you want a clean import).
+2. **Copy the app** — either:
+  - push the whole `PeopleLikeMe` monorepo, or  
+  - copy only `pathfinder/` into the new repo root and commit that as your app.
+3. **Environment** — copy **values** from your old machine’s `pathfinder/.env.local` into the new repo’s `pathfinder/.env.local` (create it next to `.env.example`). Do **not** commit `.env.local`.
+  Variables you need:
 
-- `CRUSTDATA_API_KEY` — required for LinkedIn enrich + PersonDB search  
-- Supabase URL + keys — profile cache and shared traces  
-- OpenRouter (or compatible) — insights + outreach  
+  | Variable                        | Purpose                                        |
+  | ------------------------------- | ---------------------------------------------- |
+  | `CRUSTDATA_API_KEY`             | CrustData v2 API (required)                    |
+  | `CRUSTDATA_API_URL`             | Usually `https://api.crustdata.com`            |
+  | `OPENROUTER_API_KEY`            | Insights + outreach (required for AI features) |
+  | `AI_MODEL`                      | OpenRouter model id                            |
+  | `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL                           |
+  | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key                              |
+  | `NEXT_PUBLIC_APP_URL`           | Your site URL in production                    |
 
-**Do not commit real keys.** Use your host’s secrets for production.
+4. **Replace** `pathfinder/.env.example` in the new repo with the **template** from this project (placeholders only). Your **real** keys stay only in `.env.local` or your host’s secret store.
+5. **Install & run**
+  ```bash
+   cd pathfinder
+   npm install
+   cp .env.example .env.local
+   # edit .env.local with real keys
+   npm run dev
+  ```
+6. **Supabase**: run `pathfinder/lib/supabase/schema.sql` (or your current schema) on the new project if you use a fresh database.
+7. **Clear cache** (optional, after copying DB or for a clean demo):
+  ```bash
+   curl -X POST 'http://localhost:3000/api/admin/clear-cache?confirm=yes'
+  ```
+
+---
+
+## README files: what’s what
+
+
+| File                                    | Role                                                   |
+| --------------------------------------- | ------------------------------------------------------ |
+| `**careertrace/README.md**` (this file) | Product story, migration, limits, who it’s for.        |
+| `**pathfinder/README.md**`              | Developer setup, stack, structure for the Next.js app. |
+
+
+Update both when you rename the product or change env vars.
 
 ---
 
 ## Powered by CrustData
 
-CareerTrace is built on CrustData’s **person enrich** and **PersonDB search** primitives — see `crustdata_new_api_doc/person.md` for endpoint details.
+CareerTrace is built on CrustData’s **person enrich** and **person search** (v2). Judges can follow the data path from enrich → cascade tiers → ranked journeys.
 
 ---
 
 ## License & team
 
-Built for a hackathon submission. Adjust license and authors when you publish the standalone `careertrace` repository.
+Built for a hackathon submission. Adjust license and authors when you publish.
 
 ---
 
