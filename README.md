@@ -48,7 +48,7 @@ That gap became the core problem statement for our hackathon build.
 - **Cache:** Supabase (LinkedIn profile cache, shared traces)  
 - **AI:** OpenRouter-compatible API for insights and outreach  
 
-Detailed pipeline, ranking rules, and cost notes live in **`crusdata_api_doc/ARCHITECTURE.md`** in this monorepo.
+Hackathon reference docs from the organizing committee live in **`crustdata_new_api_doc/`** (person, company, and web API markdown).
 
 ---
 
@@ -57,9 +57,9 @@ Detailed pipeline, ranking rules, and cost notes live in **`crusdata_api_doc/ARC
 This hackathon codebase lives alongside documentation:
 
 ```
-careertrace/           ← you are here (product README)
-pathfinder/            ← Next.js application (main code)
-crusdata_api_doc/      ← ARCHITECTURE.md — technical source of truth
+careertrace/              ← you are here (product README)
+pathfinder/               ← Next.js application (main code)
+crustdata_new_api_doc/    ← CrustData API reference (committee-provided)
 ```
 
 **Run the app:**
@@ -89,7 +89,7 @@ Configure in `pathfinder/.env.local` (see `pathfinder/.env.example`):
 
 ## Powered by CrustData
 
-CareerTrace is built on CrustData’s **person enrich** and **PersonDB search** primitives — the same building blocks we document in `ARCHITECTURE.md` so judges can follow the data path end-to-end.
+CareerTrace is built on CrustData’s **person enrich** and **PersonDB search** primitives — see `crustdata_new_api_doc/person.md` for endpoint details.
 
 ---
 
