@@ -15,6 +15,14 @@
  *   T5 — Same metro + same role family → goal
  *   T6 — Broad goal title (last-resort fallback)
  *
+ * IMPORTANT: company / role-family lookups use `experience.employment_details.*`
+ * (NOT `.past.*`) so they match anyone who held the company/role at ANY point —
+ * including people still currently at the company. Per CrustData docs, the
+ * top-level path covers BOTH current and past employment rows. The goal-title
+ * filter stays on `experience.employment_details.current.title` because we
+ * specifically want people who have **reached** the goal, not just held it
+ * once.
+ *
  * Each profile we return is tagged with the tier that surfaced it, so the UI
  * can render an explainable "Found via: same college (IIIT Hyderabad)" badge.
  */
@@ -26,7 +34,6 @@ import {
   DEFAULT_SEARCH_FIELDS,
   geoDistance,
   mapV2PersonToLinkedInProfile,
-  regexAny,
   regexOne,
   searchPersonV2,
   type V2Filter,
@@ -280,14 +287,17 @@ export async function runCascadeSearch(
   const stoppedEarlyAt = (): boolean => hits.length >= desiredCandidates;
 
   // ---------- T1: same employer + same role → goal ----------
+  // Match company anywhere in employment history (current OR past), and the
+  // user's role family anywhere in titles. Goal stays as current.title so we
+  // only surface people who've actually reached the goal.
   if (employers.length && roleRegex && goalRegex) {
     const t = tiers[0]!;
     t.attempted = true;
     const t1Results = await Promise.all(
       employers.map(async (company) => {
         const filters: V2Filter = combineAnd([
-          regexOne('experience.employment_details.past.company_name', company),
-          { field: 'experience.employment_details.past.title', type: '(.)', value: roleRegex },
+          regexOne('experience.employment_details.company_name', company),
+          { field: 'experience.employment_details.title', type: '(.)', value: roleRegex },
           goalCurrentClause,
         ]);
         const r = await searchPersonV2({ filters, fields: DEFAULT_SEARCH_FIELDS, limit: perQueryLimit });
@@ -309,13 +319,15 @@ export async function runCascadeSearch(
   }
 
   // ---------- T2: same employer → goal ----------
+  // Same as T1 but without the role-family filter. Captures people who
+  // pivoted from a different IC role (e.g. designer → PM) at the same company.
   if (!stoppedEarlyAt() && employers.length && goalRegex) {
     const t = tiers[1]!;
     t.attempted = true;
     const t2Results = await Promise.all(
       employers.map(async (company) => {
         const filters: V2Filter = combineAnd([
-          regexOne('experience.employment_details.past.company_name', company),
+          regexOne('experience.employment_details.company_name', company),
           goalCurrentClause,
         ]);
         const r = await searchPersonV2({ filters, fields: DEFAULT_SEARCH_FIELDS, limit: perQueryLimit });
@@ -395,7 +407,7 @@ export async function runCascadeSearch(
     t.attempted = true;
     const filters: V2Filter = combineAnd([
       geoDistance('professional_network.location.raw', metro, 50, 'km'),
-      { field: 'experience.employment_details.past.title', type: '(.)', value: roleRegex },
+      { field: 'experience.employment_details.title', type: '(.)', value: roleRegex },
       goalCurrentClause,
     ]);
     const { profiles, total_count } = await searchPersonV2({

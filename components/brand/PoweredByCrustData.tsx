@@ -23,37 +23,39 @@ export function PoweredByCrustData() {
         onClick={() => setOpen((o) => !o)}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
-        className="font-heading inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-1 text-xs font-medium text-amber-900 shadow-sm transition-colors hover:bg-amber-100"
+        className="font-heading inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 px-3 py-1 text-xs font-medium text-amber-900 shadow-sm transition-colors hover:bg-amber-100 dark:border-amber-800/60 dark:from-amber-900/40 dark:to-orange-900/30 dark:text-amber-100 dark:hover:bg-amber-900/50"
         aria-expanded={open}
       >
-        <Database className="h-3.5 w-3.5 text-amber-700" />
+        <Database className="h-3.5 w-3.5 text-amber-700 dark:text-amber-300" />
         Powered by CrustData
       </button>
 
       {open ? (
         <div
           role="tooltip"
-          className="motion-safe:animate-career-rise absolute bottom-full z-40 mb-2 w-[min(92vw,360px)] rounded-xl border border-slate-200 bg-white p-3 shadow-2xl"
+          className="motion-safe:animate-career-rise absolute bottom-full z-40 mb-2 w-[min(92vw,360px)] rounded-xl border border-slate-200 bg-white p-3 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
           onMouseEnter={() => setOpen(true)}
           onMouseLeave={() => setOpen(false)}
         >
-          <p className="font-heading mb-2 text-xs font-semibold tracking-wide text-slate-700 uppercase">
+          <p className="font-heading mb-2 text-xs font-semibold tracking-wide text-slate-700 uppercase dark:text-slate-300">
             APIs we used for this trace
           </p>
           <ul className="space-y-1.5 text-left">
             {ENDPOINTS.map((e, i) => (
-              <li key={i} className="rounded-md bg-slate-50 px-2 py-1.5 text-[11px]">
+              <li key={i} className="rounded-md bg-slate-50 px-2 py-1.5 text-[11px] dark:bg-slate-800/60">
                 <div className="flex items-center gap-1.5">
                   <span
                     className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-bold ${
-                      e.method === 'GET' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'
+                      e.method === 'GET'
+                        ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-200'
+                        : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200'
                     }`}
                   >
                     {e.method}
                   </span>
-                  <code className="font-mono text-[11px] text-slate-800">{e.path}</code>
+                  <code className="font-mono text-[11px] text-slate-800 dark:text-slate-100">{e.path}</code>
                 </div>
-                <p className="mt-0.5 text-[11px] leading-tight text-slate-600">{e.purpose}</p>
+                <p className="mt-0.5 text-[11px] leading-tight text-slate-600 dark:text-slate-400">{e.purpose}</p>
               </li>
             ))}
           </ul>
@@ -61,7 +63,7 @@ export function PoweredByCrustData() {
             href="https://docs.crustdata.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-amber-800 hover:text-amber-900 hover:underline"
+            className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-amber-800 hover:text-amber-900 hover:underline dark:text-amber-300 dark:hover:text-amber-200"
           >
             CrustData docs <ExternalLink className="h-3 w-3" />
           </a>

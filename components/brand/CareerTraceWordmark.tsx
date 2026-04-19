@@ -16,14 +16,14 @@ export function CareerTraceWordmark({ className, size = 'md' }: CareerTraceWordm
   return (
     <span
       className={cn(
-        'font-heading font-bold tracking-tight text-slate-800 select-none',
+        'font-heading font-bold tracking-tight text-slate-900 select-none dark:text-slate-100',
         sizeClass[size],
         className
       )}
     >
       CareerTrace
-      <span className="text-slate-400 font-semibold">.</span>
-      <span className="bg-gradient-to-r from-teal-600 via-sky-600 to-blue-600 bg-clip-text text-transparent">
+      <span className="text-slate-400 font-semibold dark:text-slate-500">.</span>
+      <span className="bg-gradient-to-r from-teal-600 via-sky-600 to-blue-600 bg-clip-text text-transparent dark:from-teal-400 dark:via-sky-400 dark:to-blue-400">
         AI
       </span>
     </span>

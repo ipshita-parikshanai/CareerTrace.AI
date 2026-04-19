@@ -40,7 +40,7 @@ The CrustData API docs use both shapes in different sections; **`column`** works
 
 ## 🔧 Fix Applied
 
-**File:** `pathfinder/lib/api/crustdata.ts`
+**File:** `lib/api/crustdata.ts`
 
 Changed all instances of `filter_type` to `column`:
 
@@ -165,8 +165,7 @@ cd /Users/ipshitasinghal/Desktop/PeopleLikeMe
 ### Step 2: Restart Your Dev Server
 
 ```bash
-cd pathfinder
-# Stop the server if running (Ctrl+C)
+# From the repo root — stop the server if running (Ctrl+C)
 npm run dev
 ```
 
@@ -371,8 +370,8 @@ curl -v -X POST 'https://api.crustdata.com/screener/persondb/search' \
 
 ### Files Modified
 
-- `pathfinder/lib/api/crustdata.ts` - Fixed API call
-- `pathfinder/app/page.tsx` - Improved error UI
+- `lib/api/crustdata.ts` - Fixed API call
+- `app/page.tsx` - Improved error UI
 - `TEST_API.sh` - Simple test script
 - `TEST_CURL.sh` - Detailed test script
 
