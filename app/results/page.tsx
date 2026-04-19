@@ -13,8 +13,9 @@ import { ShareTraceButton } from '@/components/share/ShareTraceButton';
 import { SiteHeader } from '@/components/brand/SiteHeader';
 import { WomenMentorsSidebar } from '@/components/results/WomenMentorsSidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Users, Lightbulb, Search } from 'lucide-react';
+import { TrendingUp, Users, BarChart3, Search } from 'lucide-react';
 import { CareerJourney, CareerInsights, CareerPathSearchStats, LinkedInProfile } from '@/lib/types';
+import { buildFallbackInsights } from '@/lib/career/fallback-insights';
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -111,6 +112,12 @@ export default function ResultsPage() {
       </div>
     );
   }
+
+  const analysisInsights: CareerInsights | null =
+    careerJourneys.length > 0
+      ? insights ?? buildFallbackInsights(careerJourneys, goalTitle)
+      : null;
+  const insightsFromAi = insights != null;
 
   if (pageState === 'error' || !userProfile) {
     return (
@@ -247,10 +254,10 @@ export default function ResultsPage() {
                     {careerJourneys.length}
                   </span>
                 </TabsTrigger>
-                {insights ? (
-                  <TabsTrigger value="insights" className="px-4 text-sm">
-                    <Lightbulb className="h-4 w-4" />
-                    Insights
+                {analysisInsights ? (
+                  <TabsTrigger value="analysis" className="px-4 text-sm">
+                    <BarChart3 className="h-4 w-4" />
+                    Analysis
                   </TabsTrigger>
                 ) : null}
                 {searchStats ? (
@@ -289,18 +296,23 @@ export default function ResultsPage() {
               </div>
             </TabsContent>
 
-            {insights ? (
-              <TabsContent value="insights" className="outline-none">
+            {analysisInsights ? (
+              <TabsContent value="analysis" className="outline-none">
                 <div className="mb-5">
                   <h3 className="font-heading text-xl font-bold text-slate-900 dark:text-slate-100">
-                    Career insights & patterns
+                    Career analysis
                   </h3>
                   <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                    Patterns across the {careerJourneys.length} journeys — timeline, common moves,
-                    and what set them apart.
+                    Timeline and patterns across the {careerJourneys.length} journeys
+                    {insightsFromAi ? ' — including AI-summarized takeaways.' : '.'}
                   </p>
                 </div>
-                <InsightsPanel insights={insights} journeys={careerJourneys} goalTitle={goalTitle} />
+                <InsightsPanel
+                  insights={analysisInsights}
+                  journeys={careerJourneys}
+                  goalTitle={goalTitle}
+                  aiPowered={insightsFromAi}
+                />
               </TabsContent>
             ) : null}
 

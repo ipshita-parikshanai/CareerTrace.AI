@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { getSupabase } from '@/lib/supabase/client';
 
 /**
  * Wipe Supabase caches. Requires `?confirm=yes` so it can't be hit accidentally.
@@ -39,6 +39,16 @@ export async function POST(request: NextRequest) {
   const wipeShared = url.searchParams.get('shared') === 'yes';
 
   const results: Record<string, { deleted: number | null; error: string | null }> = {};
+  const supabase = getSupabase();
+  if (!supabase) {
+    return NextResponse.json(
+      {
+        error:
+          'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.',
+      },
+      { status: 503 }
+    );
+  }
 
   // ---------- linkedin_profiles ----------
   let lpQuery = supabase.from('linkedin_profiles').delete();

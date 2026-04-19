@@ -1,22 +1,5 @@
-import OpenAI from 'openai';
 import type { LinkedInProfile } from '@/lib/types';
-
-/** Pick a valid HTTP-Referer for OpenRouter. Prefers NEXT_PUBLIC_APP_URL, then
- *  Vercel's auto-injected VERCEL_URL, then localhost for dev. */
-function appReferer(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return 'http://localhost:3000';
-}
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1',
-  defaultHeaders: {
-    'HTTP-Referer': appReferer(),
-    'X-Title': 'CareerTrace.AI - Outreach Drafts',
-  },
-});
+import { getOpenRouterClient } from '@/lib/ai/openrouter-client';
 
 function profileBrief(p: LinkedInProfile): string {
   const cur = p.current_employers?.[0] || p.all_employers?.[0];
@@ -100,6 +83,16 @@ Return ONLY valid JSON:
   "message": "the full draft body, plain text",
   "rationale": "1 sentence explaining the angle you used (so the user knows why)"
 }`;
+
+  const openai = getOpenRouterClient();
+  if (!openai) {
+    const fallbackBody = `Hi ${mentor.name?.split(' ')[0] || 'there'},\n\nI saw your move into ${mentor.current_title || goalTitle}. I'm currently ${user.current_title || 'working in tech'} and exploring a similar transition into ${goalTitle}. Would you be open to a 15–20 minute chat — happy to do voice notes or async if easier.\n\nThanks for considering it.`;
+    return {
+      subject: `Quick note from a ${user.current_title || 'fellow professional'}`,
+      message: fallbackBody,
+      rationale: 'OpenRouter API key not configured — using a template draft.',
+    };
+  }
 
   const completion = await openai.chat.completions.create({
     model: process.env.AI_MODEL || 'anthropic/claude-3.5-sonnet',

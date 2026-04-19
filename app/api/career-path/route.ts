@@ -7,7 +7,7 @@ import {
 import { runCascadeSearch, summarizeCascade } from '@/lib/api/cascade-search';
 import { rankByHeuristicOnly } from '@/lib/ai/similarity';
 import { generateCareerInsights } from '@/lib/ai/insights';
-import { supabase } from '@/lib/supabase/client';
+import { getSupabase } from '@/lib/supabase/client';
 import { hasEmployerHistory, normalizeLinkedInProfile } from '@/lib/api/normalize-profile';
 import type { CareerJourney, CareerPathSearchStats, LinkedInProfile } from '@/lib/types';
 import { goalMatchesProfileTitle, jobTitlesSemanticallyMatch } from '@/lib/career/title-normalize';
@@ -384,7 +384,9 @@ export async function POST(request: NextRequest) {
 
 async function getCachedProfile(linkedinUrl: string) {
   try {
-    const { data, error } = await supabase
+    const db = getSupabase();
+    if (!db) return null;
+    const { data, error } = await db
       .from('linkedin_profiles')
       .select('*')
       .eq('linkedin_url', linkedinUrl)
@@ -405,7 +407,9 @@ async function getCachedProfile(linkedinUrl: string) {
 
 async function cacheProfile(profile: LinkedInProfile) {
   try {
-    const { error } = await supabase
+    const db = getSupabase();
+    if (!db) return;
+    const { error } = await db
       .from('linkedin_profiles')
       .upsert(
         {

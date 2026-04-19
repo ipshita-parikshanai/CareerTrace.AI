@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { getSupabase } from '@/lib/supabase/client';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -13,7 +13,17 @@ export async function GET(
   }
 
   try {
-    const { data, error } = await supabase
+    const db = getSupabase();
+    if (!db) {
+      return NextResponse.json(
+        {
+          error:
+            'Shared traces are not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.',
+        },
+        { status: 503 }
+      );
+    }
+    const { data, error } = await db
       .from('shared_traces')
       .select('payload, created_at')
       .eq('id', id)

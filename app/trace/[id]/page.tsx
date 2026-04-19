@@ -10,7 +10,8 @@ import { PoweredByCrustData } from '@/components/brand/PoweredByCrustData';
 import { TraceYourFriendBox } from '@/components/share/TraceYourFriendBox';
 import { SiteHeader } from '@/components/brand/SiteHeader';
 import { normalizeLinkedInProfile } from '@/lib/api/normalize-profile';
-import { Eye, Lightbulb, Loader2, TrendingUp } from 'lucide-react';
+import { buildFallbackInsights } from '@/lib/career/fallback-insights';
+import { Eye, BarChart3, Loader2, TrendingUp } from 'lucide-react';
 import type { CareerInsights, CareerJourney, LinkedInProfile } from '@/lib/types';
 
 interface SharedTracePayload {
@@ -93,6 +94,11 @@ export default function SharedTracePage({ params }: { params: Promise<{ id: stri
   const careerJourneys = trace.careerJourneys;
   const goalTitle = trace.goalTitle;
   const insights = trace.insights;
+  const analysisInsights: CareerInsights | null =
+    careerJourneys.length > 0
+      ? insights ?? buildFallbackInsights(careerJourneys, goalTitle)
+      : null;
+  const insightsFromAi = insights != null;
 
   const totalAnchorStrength = careerJourneys.reduce(
     (s, j) =>
@@ -190,7 +196,12 @@ export default function SharedTracePage({ params }: { params: Promise<{ id: stri
         <SectionNav
           sections={[
             { id: 'paths-section', label: 'Similar paths', Icon: TrendingUp },
-            { id: 'insights-section', label: 'Insights', Icon: Lightbulb, visible: insights != null },
+            {
+              id: 'analysis-section',
+              label: 'Analysis',
+              Icon: BarChart3,
+              visible: analysisInsights != null,
+            },
           ]}
         />
 
@@ -210,13 +221,22 @@ export default function SharedTracePage({ params }: { params: Promise<{ id: stri
           />
         </SectionAnchor>
 
-        {insights ? (
-          <SectionAnchor id="insights-section" className="mt-12 block">
+        {analysisInsights ? (
+          <SectionAnchor id="analysis-section" className="mt-12 block">
             <div className="mb-6">
-              <h3 className="font-heading text-xl font-bold text-slate-900">Career insights</h3>
-              <p className="text-slate-600">AI-powered analysis of common patterns.</p>
+              <h3 className="font-heading text-xl font-bold text-slate-900">Career analysis</h3>
+              <p className="text-slate-600">
+                {insightsFromAi
+                  ? 'AI-powered patterns and experience distribution.'
+                  : 'Experience distribution from this trace (AI narrative was not saved).'}
+              </p>
             </div>
-            <InsightsPanel insights={insights} journeys={careerJourneys} goalTitle={goalTitle} />
+            <InsightsPanel
+              insights={analysisInsights}
+              journeys={careerJourneys}
+              goalTitle={goalTitle}
+              aiPowered={insightsFromAi}
+            />
           </SectionAnchor>
         ) : null}
       </main>

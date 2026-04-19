@@ -20,6 +20,8 @@ interface InsightsPanelProps {
   insights: CareerInsights;
   journeys?: CareerJourney[];
   goalTitle?: string;
+  /** False when insights come from `buildFallbackInsights` (OpenRouter failed / no key). */
+  aiPowered?: boolean;
 }
 
 /**
@@ -135,7 +137,12 @@ const ACCENT_STYLES: Record<KeyPoint['accent'], { wrap: string; iconBg: string; 
   },
 };
 
-export function InsightsPanel({ insights, journeys = [], goalTitle }: InsightsPanelProps) {
+export function InsightsPanel({
+  insights,
+  journeys = [],
+  goalTitle,
+  aiPowered = true,
+}: InsightsPanelProps) {
   const yearsData = useMemo(() => buildYearsDistribution(journeys), [journeys]);
   const hasYearsChart = yearsData.length > 0;
   const points = useMemo(() => buildKeyPoints(insights, goalTitle), [insights, goalTitle]);
@@ -143,6 +150,16 @@ export function InsightsPanel({ insights, journeys = [], goalTitle }: InsightsPa
 
   return (
     <div className="space-y-6">
+      {!aiPowered ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-100">
+          <p className="font-heading font-semibold">Analysis without AI narrative</p>
+          <p className="mt-1 text-amber-900/90 dark:text-amber-200/90">
+            The LLM step did not return data (check <code className="rounded bg-amber-100/80 px-1 dark:bg-amber-900/60">OPENROUTER_API_KEY</code>).
+            Charts and timelines below are computed from your result set only.
+          </p>
+        </div>
+      ) : null}
+
       {/* Hero: years-to-goal distribution chart + 3 stats */}
       <Card className="border border-slate-200/80 bg-white/95 shadow-md shadow-slate-900/5 dark:border-slate-800 dark:bg-slate-900/80">
         <CardHeader>

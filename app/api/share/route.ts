@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import { supabase } from '@/lib/supabase/client';
+import { getSupabase } from '@/lib/supabase/client';
 import type {
   CareerInsights,
   CareerJourney,
@@ -46,7 +46,18 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
     };
 
-    const { error } = await supabase
+    const db = getSupabase();
+    if (!db) {
+      return NextResponse.json(
+        {
+          error:
+            'Shared traces require Supabase. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment.',
+        },
+        { status: 503 }
+      );
+    }
+
+    const { error } = await db
       .from('shared_traces')
       .insert({
         id,

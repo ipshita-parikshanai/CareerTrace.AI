@@ -6,7 +6,8 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "env:pull-vercel": "npx vercel env pull .env.local"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.0",

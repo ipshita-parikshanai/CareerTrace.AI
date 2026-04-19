@@ -14,7 +14,7 @@
  *                  Development Engineer II"), no level fuzzing.
  */
 import type { Education, Employer, LinkedInProfile } from '@/lib/types';
-import { schoolSearchVariants } from '@/lib/api/crustdata';
+import { schoolSearchVariants } from '@/lib/career/school-variants';
 
 export type OverlapKind = 'employer' | 'school' | 'degree' | 'title';
 

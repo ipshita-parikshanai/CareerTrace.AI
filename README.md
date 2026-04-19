@@ -37,6 +37,22 @@ cp .env.example .env.local
 npm run dev
 ```
 
+**Match Vercel locally:** if keys are already set in the Vercel dashboard, first [link](https://vercel.com/docs/cli/link) this folder to the project (fixes `Your codebase isn't linked to a project`):
+
+```bash
+# Replace TEAM_SLUG and PROJECT_NAME with your team + project (from the Vercel URL:
+# vercel.com/TEAM_SLUG/PROJECT_NAME)
+npx vercel link --yes --scope TEAM_SLUG --project PROJECT_NAME
+```
+
+Then pull env vars into `.env.local`:
+
+```bash
+npm run env:pull-vercel
+# Production vars explicitly:
+npx vercel env pull .env.local --environment=production --yes
+```
+
 Open [http://localhost:3000](http://localhost:3000).
 
 **Supabase:** apply `lib/supabase/schema.sql` in the Supabase SQL editor if you use a fresh database.

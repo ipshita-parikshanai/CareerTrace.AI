@@ -19,6 +19,7 @@
 import type { LinkedInProfile } from '@/lib/types';
 import { normalizeLinkedInProfile, sortEducationByRecency } from '@/lib/api/normalize-profile';
 import { goalTitleSearchPhrases } from '@/lib/career/title-normalize';
+import { schoolSearchVariants } from '@/lib/career/school-variants';
 import {
   combineAnd,
   enrichPersonV2,
@@ -29,6 +30,8 @@ import {
   type V2Filter,
   DEFAULT_SEARCH_FIELDS,
 } from '@/lib/api/crustdata-v2';
+
+export { schoolSearchVariants };
 
 if (!process.env.CRUSTDATA_API_KEY) {
   console.warn('CRUSTDATA_API_KEY is not set. CrustData calls will fail.');
@@ -325,46 +328,6 @@ export function goalTitleSearchVariants(goalTitle: string): string[] {
 
   push(t);
   return ordered;
-}
-
-/** Alternate spellings of well-known schools so we don't miss IIIT / IIT rows. */
-export function schoolSearchVariants(label: string): string[] {
-  const raw = label.trim();
-  if (!raw.length) return [];
-  const out: string[] = [];
-  const push = (s: string) => {
-    const x = s.trim();
-    if (x.length < 3 || out.some((o) => o.toLowerCase() === x.toLowerCase())) return;
-    out.push(x);
-  };
-  push(raw);
-
-  if (
-    /\biiit\b/i.test(raw) &&
-    /hyderabad|iiith/i.test(raw.replace(/\s+/g, ' ').toLowerCase())
-  ) {
-    push('International Institute of Information Technology Hyderabad');
-    push('IIIT Hyderabad');
-    push('IIITH');
-  }
-  if (/international\s+institute\s+of\s+information\s+technology/i.test(raw)) {
-    push('IIIT Hyderabad');
-    push('IIITH');
-  }
-
-  const iit = raw.match(
-    /Indian\s+Institute\s+of\s+Technology\s*,?\s*([A-Za-z][A-Za-z\s]{0,40})/i
-  );
-  if (iit?.[1]) {
-    push(`IIT ${iit[1].trim()}`);
-  }
-
-  if (/\bbits\s+pilani\b/i.test(raw)) {
-    push('BITS Pilani');
-    push('Birla Institute of Technology and Science');
-  }
-
-  return out;
 }
 
 /** Headline/summary fallback when structured education is stale or missing. */

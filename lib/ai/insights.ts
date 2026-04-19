@@ -1,6 +1,6 @@
-import OpenAI from 'openai';
 import { CareerJourney, CareerInsights, LinkedInProfile } from '@/lib/types';
 import { parseJsonFromLLMResponse } from '@/lib/ai/parseJson';
+import { getOpenRouterClient } from '@/lib/ai/openrouter-client';
 
 function normalizeCareerInsights(raw: Partial<CareerInsights>): CareerInsights {
   const sp = raw.skills_progression;
@@ -19,25 +19,6 @@ function normalizeCareerInsights(raw: Partial<CareerInsights>): CareerInsights {
   };
 }
 
-/** OpenRouter requires a non-empty HTTP-Referer. Resolution order:
- *  1. NEXT_PUBLIC_APP_URL  (you set this explicitly in Vercel)
- *  2. VERCEL_URL           (Vercel injects this for every deployment)
- *  3. localhost            (local dev only) */
-function appReferer(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return 'http://localhost:3000';
-}
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
-  baseURL: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1',
-  defaultHeaders: {
-    'HTTP-Referer': appReferer(),
-    'X-Title': 'CareerTrace.AI - Career Discovery Platform',
-  },
-});
-
 /**
  * Single AI call that summarises the journeys into plain-English insights.
  * Used for the Insights tab; this is the only LLM call in the main pipeline.
@@ -48,6 +29,9 @@ export async function generateCareerInsights(
   goalTitle: string
 ): Promise<CareerInsights | null> {
   try {
+    const openai = getOpenRouterClient();
+    if (!openai) return null;
+
     const journeySummaries = journeys.map((j, idx) => ({
       person: `Person ${idx + 1}`,
       current_role: j.profile.current_title,
